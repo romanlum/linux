@@ -327,6 +327,17 @@ struct drxk_config hauppauge_930c_drxk = {
 	.chunk_size = 56,
 };
 
+struct drxk_config sundtek_drxk = {
+	.adr = 0x29,
+	.single_master = 1,
+	.microcode_name = "dvb-usb-sundtek-drxk.fw",
+	.chunk_size = 58,
+};
+static struct tda18271_config sundtek_config = {
+	
+
+};
+
 static int drxk_gate_ctrl(struct dvb_frontend *fe, int enable)
 {
 	struct em28xx_dvb *dvb = fe->sec_priv;
@@ -345,6 +356,35 @@ static int drxk_gate_ctrl(struct dvb_frontend *fe, int enable)
 	return status;
 }
 
+static void sundtek_init(struct em28xx *dev)
+{
+	int i;
+	struct em28xx_reg_seq sundtek_init_end[] = {
+		{0x0d,	0x42,	0xff,	100},
+		{ -1,                   -1,     -1,     -1},
+	};
+	struct {
+		unsigned char r[4];
+		int len;
+	} regs[] = {
+		{{ 0x05, 0x06 }, 2},
+	  
+	};
+
+        em28xx_write_reg(dev, EM28XX_R06_I2C_CLK, 0x40);
+	msleep(10);
+	em28xx_write_reg(dev, EM28XX_R06_I2C_CLK, 0x45);
+	msleep(10);
+
+	dev->i2c_client.addr = 0xc0 >> 1;
+
+	for (i = 0; i < ARRAY_SIZE(regs); i++)
+		i2c_master_send(&dev->i2c_client, regs[i].r, regs[i].len);
+	
+	msleep(10);
+	em28xx_gpio_set(dev, sundtek_init_end);
+
+}
 static void hauppauge_hvr930c_init(struct em28xx *dev)
 {
 	int i;
@@ -938,6 +978,26 @@ static int em28xx_dvb_init(struct em28xx *dev)
 			dvb_attach(a8293_attach, dvb->fe[0], &dev->i2c_adap,
 				&em28xx_a8293_config);
 		break;
+case EM2884_BOARD_SUNDTEK:
+	{
+		sundtek_init(dev);
+		dvb->fe[0] = dvb_attach(drxk_attach, &sundtek_drxk,
+				&dev->i2c_adap);
+
+		if (dvb->fe[0]) {
+			/* attach tuner */
+			if (!dvb_attach(tda18271_attach, dvb->fe[0], 0x60,
+					&dev->i2c_adap,
+					&em28xx_cxd2820r_tda18271_config)) {
+				dvb_frontend_detach(dvb->fe[0]);
+				result = -EINVAL;
+				goto out_free;
+			}
+			
+			
+		}
+break;
+	}
 	default:
 		em28xx_errdev("/2: The frontend of your DVB/ATSC card"
 				" isn't supported yet\n");
