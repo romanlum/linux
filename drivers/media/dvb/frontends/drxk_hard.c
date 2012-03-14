@@ -6323,6 +6323,7 @@ static int drxk_get_tune_settings(struct dvb_frontend *fe, struct dvb_frontend_t
 	switch (p->delivery_system) {
 	case SYS_DVBC_ANNEX_A:
 	case SYS_DVBC_ANNEX_C:
+	case SYS_DVBT:
 		sets->min_delay_ms = 3000;
 		sets->max_drift = 0;
 		sets->step_size = 0;

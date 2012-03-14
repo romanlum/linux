@@ -354,13 +354,9 @@ static struct em28xx_reg_seq hauppauge_930c_digital[] = {
 #endif
 
 static struct em28xx_reg_seq sundtek[] = {
-	{EM2874_R80_GPIO, 0xbf, 0xff, 100},
-	{EM2874_R80_GPIO, 0x7f, 0xff, 100},
-	{EM2874_R80_GPIO, 0x14, 0xff, 100}, /* GPIO_2 = 1 */
-	{EM2874_R80_GPIO, 0x54, 0xff, 050}, /* GPIO_6 = 1 */
-	{EM2874_R80_GPIO, 0xd4, 0xff, 000}, /* GPIO_7 = 1 */
 	{             -1,   -1,   -1,  -1},
 };
+
 /*
  *  Board definitions
  */
@@ -1916,12 +1912,11 @@ struct em28xx_board em28xx_boards[] = {
 			.amux     = EM28XX_AMUX_LINE_IN,
 		} },
 	},
-	[EM2884_BOARD_SUNDTEK] = {
+	[EM2874_BOARD_SUNDTEK] = {
 		.name         = "Sundtek DVB Adapter",
 		.has_dvb      = 1,
 		.tuner_type   = TUNER_ABSENT,
 		.tuner_gpio    = sundtek,
-//		.ir_codes     = RC_MAP_HAUPPAUGE,
 		.i2c_speed    = EM2874_I2C_SECONDARY_BUS_SELECT |
 				EM28XX_I2C_CLK_WAIT_ENABLE |
 				EM28XX_I2C_FREQ_400_KHZ,
@@ -2030,7 +2025,7 @@ struct usb_device_id em28xx_id_table[] = {
 	{ USB_DEVICE(0x2040, 0x4201),
 			.driver_info = EM2820_BOARD_HAUPPAUGE_WINTV_USB_2 },
         { USB_DEVICE(0xeb1a, 0x51b2),
-			.driver_info = EM2884_BOARD_SUNDTEK },
+			.driver_info = EM2874_BOARD_SUNDTEK },
 	{ USB_DEVICE(0x2040, 0x6500),
 			.driver_info = EM2880_BOARD_HAUPPAUGE_WINTV_HVR_900 },
 	{ USB_DEVICE(0x2040, 0x6502),
